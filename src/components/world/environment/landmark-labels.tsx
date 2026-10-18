@@ -4,13 +4,15 @@ import { useMemo, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { worldConfig } from "@/data/world";
+import { useGuidanceStore } from "@/stores/guidance-store";
 
 export type LandmarkRefs = RefObject<(HTMLSpanElement | null)[]>;
 
 /** HTML lives in the page's React root, outside the Three renderer. */
 export function LandmarkLabels({ labels }: { labels: LandmarkRefs }) {
+  const destination = useGuidanceStore((state) => state.destination);
   return <div className="landmark-overlay" aria-hidden="true">{worldConfig.buildings.map((building, index) =>
-    <span key={building.id} className="scene-landmark" ref={(element) => { labels.current[index] = element; }}>
+    <span key={building.id} className={`scene-landmark ${destination === building.id ? "is-guided" : ""}`} ref={(element) => { labels.current[index] = element; }}>
       <span>{String(index + 1).padStart(2, "0")}</span>{building.name}
     </span>,
   )}</div>;

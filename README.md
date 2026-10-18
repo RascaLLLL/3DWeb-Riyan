@@ -1,9 +1,10 @@
 # The Village of Riyan
 
 A medieval personal portfolio built with Next.js App Router, React, TypeScript,
-Tailwind CSS, and React Three Fiber. Phases 01–03 provide the foundation,
-procedural village, and playable civilian with Rapier collision and a follow
-camera. NPCs, quests, and approved portfolio entries have not been added yet.
+Tailwind CSS, and React Three Fiber. Phases 01–05 provide the foundation,
+procedural village, playable civilian, interactive buildings, and five villagers
+with branching dialogue. Approved portfolio entries and a full quest system
+have not been added yet.
 
 ## Installation
 
@@ -25,7 +26,9 @@ npm run lint       # ESLint with Next.js and TypeScript rules
 npm run typecheck  # Generate route types, then strict TypeScript checking
 npm run test:world # World layout, road, anchor, and gate configuration checks
 npm run test:player # Motion, real Rapier collision, camera, and input lifecycle tests
-npm test           # Both suites
+npm run test:interactions # Range, real wall occlusion, destinations, pause, and cooldown
+npm run test:dialogue # Dialogue graph/actions, NPC placement/occlusion, handoffs, camera
+npm test           # All four suites
 npm run build      # Production build
 npm start          # Serve the production build
 ```
@@ -35,9 +38,10 @@ npm start          # Serve the production build
 - `/`: responsive main menu, original illustrated concept map, and settings.
 - `/world`: client-only WebGL2 village with five landmarks, a furnished square,
   connected cobblestone/dirt roads, woodland boundaries, and an HTML directory.
-  Click/focus the scene, then WASD/arrows to walk, Shift to run, E to wave,
-  Escape to pause. Drag to rotate the third-person camera. Scroll or use +/−
-  for distance. Small screens offer directional buttons and a Run toggle.
+  Click/focus the scene, then WASD/arrows to walk, Shift to run, E to talk to
+  a nearby villager or interact at an entrance, Escape to close a panel or pause.
+  Drag to rotate the third-person camera. Scroll or use +/− for distance.
+  Small screens offer directional buttons, a Run toggle, and tappable prompts.
 - `/portfolio`: server-rendered HTML portfolio with section navigation;
   independent of WebGL and readable with JavaScript disabled. Explicit empty
   states remain until verified portfolio information is supplied.
@@ -52,6 +56,10 @@ src/components/menu/     Original SVG concept illustration
 src/components/world/    Client loader, canvas, scene composition, environment
 src/components/world/player/ Articulated civilian, controller, follow camera, HUD
 src/components/world/physics/ Static Rapier colliders
+src/components/world/interactions/ Physics query bridge, prompt, location, panels
+src/components/world/npcs/ Shared procedural resources, costumes, animated villagers
+src/components/world/dialogue/ Parchment conversation UI, text reveal, vector portraits
+src/components/portfolio/ Shared HTML contact/social/CV resources
 src/data/                Typed portfolio content and centralized world layout
 src/hooks/               Browser capability hooks
 src/stores/              Zustand state and persisted preferences
@@ -59,6 +67,8 @@ src/systems/world/       Deterministic static geometry builders, placement,
                          shared terrain mesh data, roads, and collision data
 src/systems/player/      Mutable simulation, input lifecycle, character controller,
                          camera obstruction queries
+src/systems/interactions/ Nearest-entrance selection, visibility query, interaction manager
+src/systems/dialogue/    Pure branching engine and graph validation
 src/systems/             Graphics presets and persistence adapter
 src/types/               Shared content and state contracts
 public/assets/           Optional assets and license/replacement documentation
@@ -66,8 +76,10 @@ tests/                   World configuration and player/physics tests
 ```
 
 The canvas is loaded with `ssr: false` from a client component and only on
-`/world`. Active gameplay renders continuously; manual/blocking pause switches
-to on-demand rendering and pauses physics. Pixel ratio and shadows follow quality.
+`/world`. Active gameplay renders continuously. Manual, Settings, and building
+pause use on-demand rendering. Conversations keep visual frames running for NPC
+gestures and camera framing, while physics/player movement remain paused.
+Pixel ratio and shadows follow quality.
 HTML navigation remains available around the scene. WebGL unavailability,
 render errors, and context loss expose an HTML fallback link.
 
@@ -133,8 +145,8 @@ turning is a visual animation state layered over directional movement.
 The original low-poly resident has a beige tunic, belt, brown boots, and satchel.
 `CivilianCharacter` receives the runtime and uses a feet origin facing +Z,
 independent of the capsule. Its idle, stride, run, turning lean, and wave animation
-use articulated groups. E/Wave is a standalone friendly gesture, not an NPC or
-building interaction. A future compatible rigged GLB should replace only this
+use articulated groups. The Wave button remains a standalone friendly gesture;
+E is reserved for nearby building interactions. A future compatible rigged GLB should replace only this
 visual, use AnimationMixer with mapped clips, and retain the procedural fallback;
 see the asset policy. No GLB or AnimationMixer path is claimed to be running now.
 
@@ -166,8 +178,98 @@ pause scene controls. Audio values are saved preferences only: audio is not
 implemented in this phase.
 
 The native dialog handles modal focus containment and Escape; focus returns to
-the trigger. UI respects both OS reduced motion and the saved preference.
+the trigger for Settings, or to the scene after closing a building panel.
+UI respects both OS reduced motion and the saved preference.
 Use keyboard HTML navigation or Quick Portfolio whenever 3D controls are unsuitable.
+
+## Interactive buildings
+
+Approach the small brass-colored ground marker at a building entrance. The
+wooden signs identify its name and purpose. A nearby prompt reads “Press E to
+interact” and also works as a button for keyboard/touch users. There is no E
+action from across the village. The location label changes as you enter a district.
+
+`src/data/world.ts` remains the coordinate/anchor/section source.
+`src/data/building-interactions.ts` maps stable IDs to presentation and defines
+interaction tuning. The centralized manager checks all five anchors, selects
+the nearest within its two-unit radius, checks height and the facade side, and
+casts a Rapier ray from the resident toward the anchor. Solid obstacles block
+interaction; sensors and the resident's own body are excluded. E and prompt
+clicks use the same request path and revalidate geometry on the next frame.
+
+Cottage maps to About Me; Guild to Projects; Forge to Skills; Library to
+Experience, Education, and Certifications; Gate to Contact. The HTML panels use
+the same typed local content as `/portfolio`, including explicit empty states.
+No biography, achievements, projects, credentials, or contact links are invented.
+
+Opening sets the shared blocking panel and pauses physics/camera. The canvas,
+resident, position, and camera remain mounted. Native dialog focus containment,
+Escape/Close/Return controls, a short fade, and a 350 ms reopening guard manage
+the transition. Closing restores scene focus and clears old input; press a fresh
+movement key to continue. Reduced motion skips the fade. A separate transient
+Zustand store publishes only target/location/panel changes; it is not persisted
+and resets on world exit or context loss. The visibility ray and sign geometry
+are reused. Five original canvas-painted sign textures require no external assets.
+
+These building destinations are information panels; no full 3D interiors,
+quest log, or automatic navigation is implemented. All destinations also have
+working links in the HTML directory below the scene.
+
+## Villagers and dialogue
+
+Elder Alden welcomes visitors beside the well. Elara keeps the guild approach,
+Borin stands by the forge, Lyra tends the library approach, and Rowan waits on
+the inner gate road. Their cloak/staff, guild attire/ledger, apron/hammer,
+books/glasses, and cap/keys distinguish them. All five use original procedural
+models and vector portraits, with no external model, texture, or font download.
+
+`src/data/npcs.ts` holds stable IDs, names, roles, derived building-relative
+positions, rotations, appearance references, idle/talk/turn/wave tuning,
+dialogue tree IDs, ranges, and destinations. Square placement is explicit there.
+Static capsules prevent walking through villagers. NPCs turn toward the resident
+nearby and during conversation. Animation uses shared resources and mutable
+group refs; motion preferences disable decorative breathing/gestures.
+
+The central interaction manager compares the nearest visible NPC with the
+nearest visible entrance. The closest wins, with building priority on exact ties.
+The prompt shows the NPC name and “Press E to Talk,” or the building action.
+Range, floor, wall, focus, pause, and cooldown rules apply to both. Talk rays
+exclude only the addressed NPC and resident, so other villagers still occlude.
+
+`src/data/dialogues.ts` contains the authored dialogue trees. Nodes have stable
+IDs, speaker, concise text, optional expression, choices, next node, and action.
+The pure engine in `src/systems/dialogue/engine.ts` supports opening a portfolio
+panel, highlighting a destination, completing an objective, closing, and branching.
+Automatic branches have cycle/step guards. Invalid nodes fail safely, and the UI
+always provides an independent Close/Escape exit. Validation checks references,
+speakers, choices, destinations, objectives, automatic cycles, and exit paths.
+Manual “another question” loops are intentional and always escapable.
+
+The native parchment dialog has distinct portraits, choices, Continue, Close,
+and optional typewriter text. Show all text skips revealing; choices can be
+selected immediately. Tab/Shift+Tab and Enter/Space operate native buttons.
+Screen readers receive the complete node text instead of character announcements.
+OS/saved reduced motion shows text instantly and leaves the camera still.
+
+Normal conversations smoothly reframe the pair from the closer side, with at
+most a 90-degree desired orbit change. Existing sphere sweeps still protect walls;
+the addressed NPC is excluded from these sweeps so close talks do not collapse
+the camera into the pair. Closing restores canvas focus and smooth follow;
+original player coordinates and orbit preferences remain intact. A portfolio
+action transfers directly to the existing building dialog without unpausing.
+
+Directions mark the destination label and entrance ring, and show its name in a
+small guidance card. Alden supplies readable walking instructions. There is no
+teleport. `src/stores/guidance-store.ts` holds this highlight and the idempotent
+“Meet Elder Alden” discovery action. This is a session-only objective hook, not
+a quest log/reward system. Dialogue/guidance state resets on world exit/context loss.
+
+Rowan opens the contact panel. `portfolio.contact` supports approved email,
+social profiles, and a real CV file under `public/assets/`; shared HTML rendering
+also exposes these independently on `/portfolio`. All are currently unavailable,
+so no fake social link or download button is shown. A CV file must actually be
+added and approved before setting its path. NPC writing explains missing content.
+The guild board remains decorative; Elara says to use the Projects panel.
 
 ## Dependency compatibility
 
@@ -206,17 +308,19 @@ See `public/assets/README.md` for the future model replacement and license polic
 
 ## Planned phases
 
-Phases 01–03 are implemented. Later phases remain subject to explicit scope:
+Phases 01–05 are implemented. Later phases remain subject to explicit scope:
 
 1. Foundation: project setup, menu, settings, routing, HTML fallback, scene test.
 2. Medieval world: finite terrain, five landmarks, square, roads, scenery, and
    configuration/obstacle preparation.
 3. Exploration: civilian model, animation, movement, follow camera, collisions,
    input lifecycle, and development diagnostics.
-4. Interactions: NPCs, dialogue, buildings, and objects.
-5. Portfolio integration: guild projects, blacksmith skills, library experience
-   and education, gate contact, using approved real content.
-6. Optional discovery quests, accessibility polish, performance, deployment QA.
+4. Interactive buildings: entrance proximity/visibility, signs, locations,
+   shared portfolio panels, and safe return to exploration.
+5. NPCs/dialogue: five distinct villagers, branching authored conversations,
+   portfolio handoffs, walking guidance, and objective action hooks.
+6. Approved portfolio content, additional objects, and optional discovery quests
+   only when requested; accessibility/performance polish and deployment QA.
 
 ## Vercel
 
@@ -238,13 +342,27 @@ first dev run; the existing project instructions are preserved above it.
 4. Enter `/world`, focus the canvas, and walk with WASD/arrows. Hold Shift to run;
    turn with a different direction and try a diagonal. Drag and adjust distance.
    Approach walls and trunks, traverse the gate, and release keys to stop. Press
-   E to wave, then Escape to pause and hold W: position must remain fixed. Open
+   the Wave button, then Escape to pause and hold W: position must remain fixed. Open
    Settings and use a volume slider's arrow keys: the resident must stay still.
    Return focus to the canvas to continue. Development Debug can show values
    and colliders. On small screens test direction holds, Run, and +/− controls.
    Change graphics quality and follow directory links without losing navigation.
-5. Visit `/portfolio` directly with WebGL unavailable and with JavaScript disabled;
+5. Visit all five entrance markers. Check nearby prompts, E and prompt-click
+   opening, correct sections, Escape/Return, restored scene focus, and unchanged
+   position. Walk away: the prompt must disappear. Try E far from all targets,
+   behind a building, and while Settings is open: no destination should open.
+   Hold E and close a panel: it must not immediately reopen. Repeat at mobile
+   width and with reduced motion enabled.
+6. Talk to all five villagers. Try Alden’s controls/Continue, destination choices,
+   and optional stroll; check guidance without teleporting. Use each keeper's
+   Open action and check the matching building panel. End conversations using
+   Escape/Close, then press a fresh movement key. Verify no E-repeat reopening.
+   Test Tab/Shift+Tab, Enter/Space, Show all text, the reveal preference, and
+   reduced motion. Rowan must show unavailable social/CV states, not fake links.
+7. Visit `/portfolio` directly with WebGL unavailable and with JavaScript disabled;
    confirm section links and all content remain accessible.
-6. Emulate reduced motion; check the loading indicator no longer animates.
-7. Check browser console for unexpected errors and run npm test, lint, typecheck,
-   and build. See docs/phase-03-verification.md for tested scope and limitations.
+8. Emulate reduced motion; check the loading indicator no longer animates.
+9. Check browser console for unexpected errors and run npm test, lint, typecheck,
+   and build sequentially. See docs/phase-05-verification.md for tested scope
+   and limitations. Browser origin approval previously declined localhost;
+   the Phase 05 visual/keyboard browser pass was not attempted again.

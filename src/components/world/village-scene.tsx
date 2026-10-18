@@ -14,6 +14,9 @@ import { Terrain } from "./environment/terrain";
 import { WorldColliders } from "./physics/world-colliders";
 import { PlayerController } from "./player/player-controller";
 import { ThirdPersonCamera } from "./player/third-person-camera";
+import { InteractionManager } from "./interactions/interaction-manager";
+import { BuildingSigns } from "./environment/building-signs";
+import { VillageNpcs } from "./npcs/village-npcs";
 
 export function VillageScene({ runtime, body, debugColliders }: { runtime: PlayerRuntimeRef; body: PlayerBodyRef; debugColliders: boolean }) {
   const quality = useGameStore((s) => s.graphicsQuality);
@@ -33,11 +36,14 @@ export function VillageScene({ runtime, body, debugColliders }: { runtime: Playe
       shadow-camera-near={1} shadow-camera-far={115} />
     <Terrain data={terrain} />
     <StaticInstances parts={model.parts} shadows={preset.shadows} />
+    <BuildingSigns />
     <Suspense fallback={null}>
       <Physics timeStep={playerConfig.fixedStep} interpolate paused={paused} colliders={false}
         debug={process.env.NODE_ENV === "development" && debugColliders} updatePriority={-50}>
         <WorldColliders obstacles={model.obstacles} parts={model.parts} terrain={terrain} />
+        <VillageNpcs runtime={runtime} />
         <PlayerController runtime={runtime} body={body} />
+        <InteractionManager runtime={runtime} body={body} />
         <ThirdPersonCamera runtime={runtime} body={body} />
       </Physics>
     </Suspense>

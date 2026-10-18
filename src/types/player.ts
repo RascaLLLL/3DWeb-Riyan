@@ -30,6 +30,7 @@ export interface PlayerRuntime {
   collisions: number;
   interactionRemaining: number;
   waveRequested: boolean;
+  interactionRequested: boolean;
   elapsed: number;
   cameraYaw: number;
   cameraPitch: number;

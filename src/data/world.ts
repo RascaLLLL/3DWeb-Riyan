@@ -30,10 +30,10 @@ function building(
 }
 
 const buildings: BuildingDefinition[] = [
-  building("cottage", "Player Cottage", [-16, 0, 8], 2.03, [6, 3.6, 5], "sageRoof", ["about"], "/portfolio#main-content", "A small timber home with a moss-green roof and a flower garden."),
+  building("cottage", "Player Cottage", [-16, 0, 8], 2.03, [6, 3.6, 5], "sageRoof", ["about"], "/portfolio#about", "A small timber home with a moss-green roof and a flower garden."),
   building("guild", "Adventurer’s Guild", [-14, 0, -12], .74, [8.2, 5.3, 6], "terracotta", ["projects"], "/portfolio#projects", "The red-roofed guild hall, marked by a hanging shield and quest board."),
   building("forge", "Blacksmith Forge", [16, 0, 5], -1.88, [7, 3.8, 5.5], "darkRoof", ["skills"], "/portfolio#skills", "A charcoal-roofed workshop with an open forge, anvil, and stone chimney."),
-  building("library", "Grand Library", [11, 0, -16], -.5, [8, 6, 6], "slate", ["experience", "education"], "/portfolio#experience", "The tall slate-roofed library with an adjoining round tower."),
+  building("library", "Grand Library", [11, 0, -16], -.5, [8, 6, 6], "slate", ["experience", "education", "certifications"], "/portfolio#experience", "The tall slate-roofed library with an adjoining round tower."),
   building("gate", "Kingdom Gate", [0, 0, 26], Math.PI, [12.4, 6, 3.4], "slate", ["contact"], "/portfolio#contact", "Twin stone towers frame the southern road into the village."),
 ];
 

@@ -9,7 +9,7 @@ export function createPlayerRuntime(): PlayerRuntime {
     velocity: { x: 0, z: 0 }, verticalVelocity: 0,
     heading: worldConfig.spawn.rotation, turnAmount: 0, speed: 0,
     state: "idle", animation: "idle", grounded: false, blocked: false, collisions: 0,
-    interactionRemaining: 0, waveRequested: false, elapsed: 0,
+    interactionRemaining: 0, waveRequested: false, interactionRequested: false, elapsed: 0,
     cameraYaw: config.camera.yaw, cameraPitch: config.camera.pitch,
     cameraDistance: config.camera.distance, cameraActualDistance: config.camera.distance, cameraObstructed: false,
     input: { keys: new Set(), touchX: 0, touchY: 0, touchRun: false, focused: true,
@@ -23,6 +23,7 @@ export function clearPlayerInput(runtime: PlayerRuntime) {
   runtime.input.dragging = false; runtime.input.pointerId = -1;
   runtime.velocity.x = 0; runtime.velocity.z = 0; runtime.speed = 0;
   runtime.waveRequested = false;
+  runtime.interactionRequested = false;
 }
 
 export function setTouchMovement(runtime: PlayerRuntime, x: number, y: number, running: boolean) {
@@ -32,6 +33,10 @@ export function setTouchMovement(runtime: PlayerRuntime, x: number, y: number, r
 
 export function requestWave(runtime: PlayerRuntime) {
   runtime.input.focused = true; runtime.waveRequested = true;
+}
+
+export function requestInteraction(runtime: PlayerRuntime) {
+  runtime.input.focused = true; runtime.interactionRequested = true;
 }
 
 export function setTouchRunning(runtime: PlayerRuntime, running: boolean) {

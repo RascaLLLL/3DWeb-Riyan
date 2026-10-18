@@ -45,7 +45,7 @@ export function PlayerHUD({ runtime, debug, setDebug, colliders, setColliders }:
   return <div className="player-hud">
     <div className="player-toolbar">
       <button className="player-tool" onClick={() => setPaused(!userPaused)} disabled={panel !== null}>{userPaused ? "Resume" : "Pause"}</button>
-      <button className="player-tool" disabled={paused} onClick={() => requestWave(runtime.current)}>Wave <span className="desktop-key">(E)</span></button>
+      <button className="player-tool" disabled={paused} onClick={() => requestWave(runtime.current)}>Wave</button>
       <button className="player-tool camera-tool" aria-label="Move camera closer" disabled={paused} onClick={() => adjustCameraDistance(runtime.current, -.8)}>+</button>
       <button className="player-tool camera-tool" aria-label="Move camera farther" disabled={paused} onClick={() => adjustCameraDistance(runtime.current, .8)}>−</button>
       {process.env.NODE_ENV === "development" && <button className="player-tool" aria-pressed={debug} onClick={() => setDebug(!debug)}>Debug</button>}

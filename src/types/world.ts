@@ -1,7 +1,7 @@
 export type Vec3 = [number, number, number];
 export type Vec2 = [number, number];
 export type BuildingId = "cottage" | "guild" | "forge" | "library" | "gate";
-export type PortfolioSectionId = "about" | "projects" | "skills" | "experience" | "education" | "contact";
+export type PortfolioSectionId = "about" | "projects" | "skills" | "experience" | "education" | "certifications" | "contact";
 
 export interface StaticObstacle {
   id: string;

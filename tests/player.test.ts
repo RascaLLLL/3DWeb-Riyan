@@ -225,10 +225,20 @@ test("input bindings clear on blur, ignore forms/menus, release capture, and rem
   const cleanup = bindPlayerInput(canvas as unknown as HTMLCanvasElement, { current: state });
   try {
     send(windowSurface, "keydown", { code: "KeyW" }); assert.ok(state.input.keys.has("KeyW"));
+    send(windowSurface, "keydown", { code: "KeyE", repeat: true }); assert.equal(state.interactionRequested, false);
+    send(windowSurface, "keydown", { code: "KeyE", repeat: false }); assert.equal(state.interactionRequested, true);
+    assert.equal(state.waveRequested, false);
     const editor = new Surface(); editor.editable = true; documentState.activeElement = editor;
+    state.interactionRequested = false;
     send(windowSurface, "keydown", { code: "KeyE" }); assert.equal(state.waveRequested, false);
+    assert.equal(state.interactionRequested, false);
     documentState.activeElement = canvas;
     useGameStore.getState().setPanel("settings"); assert.equal(state.input.keys.size, 0);
+    send(windowSurface, "keydown", { code: "KeyE" }); assert.equal(state.interactionRequested, false);
+    send(windowSurface, "keydown", { code: "KeyW" }); assert.equal(state.input.keys.size, 0);
+    useGameStore.getState().setPanel(null);
+    useGameStore.getState().setPanel("dialogue");
+    send(windowSurface, "keydown", { code: "KeyE" }); assert.equal(state.interactionRequested, false);
     send(windowSurface, "keydown", { code: "KeyW" }); assert.equal(state.input.keys.size, 0);
     useGameStore.getState().setPanel(null);
     send(canvas, "pointerdown", { button: 0, isPrimary: true, pointerId: 1, clientX: 10, clientY: 10 });

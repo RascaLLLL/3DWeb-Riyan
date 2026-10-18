@@ -1,7 +1,29 @@
 # Asset policy
 
-Phases 01–03 use original code-authored SVG artwork and procedural Three.js geometry.
+Phases 01–05 use original code-authored SVG artwork and procedural Three.js geometry.
 No external models, images, fonts, audio, or proprietary assets are required.
+
+Phase 04 entrance signs in `building-signs.tsx` use five original 768 × 256
+canvas-painted textures with system Georgia/serif text. No font file or external
+texture is downloaded or redistributed. Sign geometry/materials are shared and
+disposed with the scene. A future verified sign/model replacement must retain
+the ID, purpose, readable label, and anchor from the interaction/world data.
+
+Phase 05's five villagers in `src/components/world/npcs/` use original shared
+Three.js geometry and role-specific costumes: Alden's cloak/staff/white beard,
+Elara's braid/ledger/brooch, Borin's apron/work hammer, Lyra's glasses/books/scroll,
+and Rowan's cap/keys. Their portraits are original inline SVGs in
+`src/components/world/dialogue/npc-portrait.tsx`. No external assets were introduced.
+`procedural:*` appearance references are configuration IDs, not downloadable URLs.
+
+For a future NPC GLB, verify its actual license/files before extending the
+appearance reference type. Keep the stable NPC ID, collider, world placement,
+dialogue tree, and interaction range. Use a feet origin at Y=0 facing +Z and map
+idle/talking/turning/wave clips behind the visual boundary. Preserve the procedural
+visual on optional loading failure. No GLB loader/clip is claimed active today.
+
+No CV has been supplied. Do not generate a fictional CV or set an asset path
+until the approved document actually exists in `public/assets/`.
 
 For future GLB assets, record source URL, author, license, attribution requirements,
 and modifications here before use. Verify redistribution and deployment rights.

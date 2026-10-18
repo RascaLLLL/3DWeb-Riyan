@@ -31,7 +31,7 @@ export function bindPlayerInput(canvas: HTMLCanvasElement, runtime: PlayerRuntim
       }
       if (isBlocked()) return;
       if (movementKeys.has(event.code)) { event.preventDefault(); state.input.keys.add(event.code); }
-      if (event.code === "KeyE" && !event.repeat) { event.preventDefault(); state.waveRequested = true; }
+      if (event.code === "KeyE" && !event.repeat) { event.preventDefault(); state.interactionRequested = true; }
     };
     const up = (event: KeyboardEvent) => { state.input.keys.delete(event.code); };
     const pointerDown = (event: PointerEvent) => {
@@ -65,7 +65,7 @@ export function bindPlayerInput(canvas: HTMLCanvasElement, runtime: PlayerRuntim
         if (game.gamePaused || game.activePanel !== null) state.state = "paused";
       }
     });
-    canvas.setAttribute("tabindex", "0"); canvas.setAttribute("aria-label", "Village controls. WASD or arrows to walk, Shift to run, E to wave, Escape to pause. Drag to rotate the camera.");
+    canvas.setAttribute("tabindex", "0"); canvas.setAttribute("aria-label", "Village controls. WASD or arrows to walk, Shift to run, E to talk to a nearby villager or interact at an entrance, Escape to pause. Drag to rotate the camera.");
     state.input.focused = document.hasFocus() && document.activeElement === canvas;
     if (isBlocked()) state.state = "paused";
     window.addEventListener("keydown", down); window.addEventListener("keyup", up);

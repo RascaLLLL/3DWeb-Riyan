@@ -13,7 +13,9 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test:world": "node --test tests/world-config.test.mjs",
     "test:player": "node --import tsx --test tests/player.test.ts",
-    "test": "npm run test:world && npm run test:player"
+    "test:interactions": "node --import tsx --test tests/interactions.test.ts",
+    "test:dialogue": "node --import tsx --test tests/dialogue.test.ts",
+    "test": "npm run test:world && npm run test:player && npm run test:interactions && npm run test:dialogue"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.19.2",
