@@ -8,10 +8,12 @@ import { preferenceStorage } from "@/systems/preference-storage";
 interface GameState extends SavedSettings {
   gameStarted: boolean;
   gamePaused: boolean;
+  userPaused: boolean;
   activePanel: ActivePanel;
   startGame: () => void;
   stopGame: () => void;
   setPanel: (panel: ActivePanel) => void;
+  setPaused: (paused: boolean) => void;
   setGraphicsQuality: (quality: GraphicsQuality) => void;
   setVolume: (channel: "musicVolume" | "soundEffectsVolume", volume: number) => void;
   setPlayerPreferences: (preferences: Partial<PlayerPreferences>) => void;
@@ -38,10 +40,11 @@ function readSettings(value: unknown): SavedSettings {
 
 export const useGameStore = create<GameState>()(persist((set) => ({
   ...defaults,
-  gameStarted: false, gamePaused: false, activePanel: null,
-  startGame: () => set({ gameStarted: true, gamePaused: false, activePanel: null }),
-  stopGame: () => set({ gameStarted: false, gamePaused: false, activePanel: null }),
-  setPanel: (activePanel) => set((state) => ({ activePanel, gamePaused: state.gameStarted && activePanel !== null })),
+  gameStarted: false, gamePaused: false, userPaused: false, activePanel: null,
+  startGame: () => set({ gameStarted: true, gamePaused: false, userPaused: false, activePanel: null }),
+  stopGame: () => set({ gameStarted: false, gamePaused: false, userPaused: false, activePanel: null }),
+  setPanel: (activePanel) => set((state) => ({ activePanel, gamePaused: state.gameStarted && (state.userPaused || activePanel !== null) })),
+  setPaused: (userPaused) => set((state) => ({ userPaused, gamePaused: state.gameStarted && (userPaused || state.activePanel !== null) })),
   setGraphicsQuality: (graphicsQuality) => set({ graphicsQuality }),
   setVolume: (channel, value) => set({ [channel]: Math.max(0, Math.min(1, value)) }),
   setPlayerPreferences: (preferences) => set((state) => ({ playerPreferences: { ...state.playerPreferences, ...preferences } })),

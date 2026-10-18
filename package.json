@@ -10,9 +10,13 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test:world": "node --test tests/world-config.test.mjs",
+    "test:player": "node --import tsx --test tests/player.test.ts",
+    "test": "npm run test:world && npm run test:player"
   },
   "dependencies": {
+    "@dimforge/rapier3d-compat": "0.19.2",
     "@react-three/drei": "10.7.9",
     "@react-three/fiber": "9.8.2",
     "@react-three/rapier": "2.2.0",
@@ -31,6 +35,7 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.2",
     "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
     "typescript": "^5.9.3"
   }
 }
