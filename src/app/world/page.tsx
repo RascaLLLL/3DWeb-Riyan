@@ -5,6 +5,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { SettingsButton } from "@/components/settings-button";
 import { MedievalInterface } from "@/components/ui/medieval-interface";
 import { worldConfig } from "@/data/world";
+import "../exploration.css";
 
 export const metadata: Metadata = { title: "Explore the Village" };
 export default function WorldPage() {
@@ -15,7 +16,7 @@ export default function WorldPage() {
     </header>
     <main id="main-content">
       <div className="world-heading">
-        <div><p className="eyebrow">Chapter V · Familiar faces</p><h1>A resident for a day</h1></div>
+        <div><p className="eyebrow">Chapter VII · Paths and discoveries</p><h1>A resident for a day</h1></div>
         <ButtonLink href="/" className="button-secondary button-small">← Main menu</ButtonLink>
       </div>
       <div className="world-viewport" aria-label="Playable medieval village">
@@ -23,7 +24,7 @@ export default function WorldPage() {
         <noscript><div className="world-fallback">JavaScript is needed for 3D. The village directory below and <Link href="/portfolio">HTML portfolio</Link> remain available.</div></noscript>
       </div>
       <div className="world-description">
-        <p><strong>Meet the people behind the doors.</strong> Elder Alden waits near the well. Talk to the keepers for directions and portfolio rooms, or use the HTML directory below.</p>
+        <p><strong>Take a path of your own.</strong> Elder Alden waits near the well. Journal and Map above the village offer five optional discoveries. Every portfolio section is always available through the keepers or HTML directory below.</p>
         <p><kbd>WASD</kbd> / arrows · <kbd>Shift</kbd> run · <kbd>E</kbd> talk / interact nearby · <kbd>Esc</kbd> close / pause<br />Drag to look · Scroll to adjust camera distance · Touch controls on small screens</p>
       </div>
       <section className="village-directory" aria-labelledby="directory-heading">

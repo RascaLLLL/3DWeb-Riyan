@@ -20,6 +20,8 @@ import { useGameStore } from "../src/stores/game-store";
 import { useInteractionStore } from "../src/stores/interaction-store";
 import { useDialogueStore } from "../src/stores/dialogue-store";
 import { useGuidanceStore } from "../src/stores/guidance-store";
+import { questStore } from "../src/stores/quest-store";
+import { initialExplorationProgress } from "../src/systems/exploration/progress";
 import type { DialogueCatalog, DialogueSession } from "../src/types/dialogue";
 import type { NpcDefinition } from "../src/types/npc";
 
@@ -27,6 +29,7 @@ before(async () => { await RAPIER.init(); });
 afterEach(() => {
   useDialogueStore.getState().reset(); useInteractionStore.getState().reset();
   useGuidanceStore.getState().reset(); useGameStore.getState().stopGame();
+  questStore.setState(initialExplorationProgress());
 });
 const visible = () => true;
 function approachNpc(npc: NpcDefinition) {
@@ -204,22 +207,22 @@ test("dialogue hands off to each correct portfolio panel without an unpaused sta
   }
 });
 
-test("directions and discovery actions update session guidance without moving the resident", () => {
+test("directions and discovery actions update guidance and the journal without moving the resident", () => {
   const runtime = begin(npcs[0]), position = { ...runtime.position };
-  assert.deepEqual(useGuidanceStore.getState().completedObjectives, ["meet-guide"]);
+  assert.deepEqual(questStore.getState().completedObjectives, ["meet-guide"]);
   useDialogueStore.getState().respond({ type: "choice", id: "directions" });
   useDialogueStore.getState().respond({ type: "choice", id: "library" });
   assert.equal(useGuidanceStore.getState().destination, "library");
   assert.deepEqual(runtime.position, position);
   useDialogueStore.getState().respond({ type: "continue" });
   useDialogueStore.getState().respond({ type: "choice", id: "back" });
-  assert.deepEqual(useGuidanceStore.getState().completedObjectives, ["meet-guide"], "idempotent objective action");
+  assert.deepEqual(questStore.getState().completedObjectives, ["meet-guide"], "idempotent objective action");
   useGameStore.getState().setPaused(true);
   useDialogueStore.getState().beginClose(); useDialogueStore.getState().finishClose(2000);
   assert.equal(useGameStore.getState().gamePaused, true);
 });
 
-test("NPC interaction respects settings/focus guards and contact resources are honestly unavailable", () => {
+test("NPC interaction respects settings/focus guards and public contact data retains an unavailable CV", () => {
   useGameStore.getState().startGame();
   const runtime = createPlayerRuntime(); runtime.position = approachNpc(npcs[0]);
   useGameStore.getState().setPanel("settings");
@@ -228,7 +231,7 @@ test("NPC interaction respects settings/focus guards and contact resources are h
   useGameStore.getState().setPanel(null); runtime.input.focused = false;
   runtime.interactionRequested = true; updateWorldInteractions(runtime, visible, visible, 1100);
   assert.equal(useDialogueStore.getState().session, null);
-  assert.equal(portfolio.contact.cv, null); assert.equal(portfolio.contact.socialProfiles.length, 0);
+  assert.equal(portfolio.contact.cv, null); assert.equal(portfolio.contact.socialProfiles.length, 3);
   const saved = useGameStore.persist.getOptions().partialize!(useGameStore.getState())!;
   assert.ok(saved && typeof saved === "object");
   assert.ok(!("session" in saved) && !("completedObjectives" in saved));

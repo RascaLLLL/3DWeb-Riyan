@@ -1,5 +1,5 @@
 export type GraphicsQuality = "low" | "medium" | "high";
-export type ActivePanel = "settings" | "building" | "dialogue" | null;
+export type ActivePanel = "settings" | "building" | "dialogue" | "journal" | "map" | null;
 
 export interface PlayerPreferences {
   reducedMotion: boolean;

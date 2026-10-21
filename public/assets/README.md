@@ -3,6 +3,15 @@
 Phases 01–05 use original code-authored SVG artwork and procedural Three.js geometry.
 No external models, images, fonts, audio, or proprietary assets are required.
 
+Phase 06 adds five first-party portfolio PNGs in `portfolio/`: the owner's
+published portrait and four project captures. They were migrated from the
+owner-identified portfolio at the user's direction, not under an invented asset
+pack license. Sources, dimensions, hashes, permission basis, and exclusions are
+documented in `docs/portfolio-source-audit.md`. The existing IoT stock illustration
+was not copied or represented as a real project capture. Original source files
+remain unchanged; Next Image handles responsive delivery. Textual portfolio
+content stays usable if any optional image fails. No external 3D asset was added.
+
 Phase 04 entrance signs in `building-signs.tsx` use five original 768 × 256
 canvas-painted textures with system Georgia/serif text. No font file or external
 texture is downloaded or redistributed. Sign geometry/materials are shared and

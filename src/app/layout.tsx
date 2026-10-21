@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PreferencesProvider } from "@/components/preferences-provider";
 import "./globals.css";
+import "./portfolio.css";
 
 export const metadata: Metadata = {
   title: { default: "The Village of Riyan", template: "%s | The Village of Riyan" },

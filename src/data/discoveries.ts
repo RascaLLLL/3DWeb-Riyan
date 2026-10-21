@@ -1,4 +1,5 @@
 import type { DiscoveryObjectiveId } from "@/types/dialogue";
+import { quests } from "./quests";
 
-// A small dialogue action hook, not a quest log, reward, or progression system.
-export const discoveryObjectives: Record<DiscoveryObjectiveId, string> = { "meet-guide": "Meet Elder Alden" };
+// Dialogue validation uses the same objective catalog as the journal.
+export const discoveryObjectives = Object.fromEntries(quests.map((quest) => [quest.id, quest.title])) as Record<DiscoveryObjectiveId, string>;

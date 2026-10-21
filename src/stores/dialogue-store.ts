@@ -7,6 +7,8 @@ import { startDialogue, advanceDialogue } from "@/systems/dialogue/engine";
 import { useGameStore } from "./game-store";
 import { useInteractionStore } from "./interaction-store";
 import { useGuidanceStore } from "./guidance-store";
+import { questStore } from "./quest-store";
+import { questsById } from "@/data/quests";
 import type { NpcId } from "@/types/npc";
 import type { DialogueInput, DialogueResult, DialogueSession } from "@/types/dialogue";
 
@@ -27,7 +29,13 @@ export const useDialogueStore = create<DialogueState>((set, get) => {
     const panel = result.effects.find((effect) => effect.type === "open-panel");
     for (const effect of result.effects) {
       if (effect.type === "highlight-destination") useGuidanceStore.getState().highlight(effect.destination);
-      if (effect.type === "complete-objective") useGuidanceStore.getState().complete(effect.objective);
+      if (effect.type === "complete-objective") {
+        const objective = questsById[effect.objective], speaker = result.session?.npcId;
+        // A dialogue action can only confirm the objective for its actual speaker.
+        if (objective?.objectiveType === "talk-to-npc" && speaker === objective.targetId) {
+          questStore.getState().recordEvent({ type: "npc-talked", targetId: speaker });
+        }
+      }
     }
     if (panel?.type === "open-panel") {
       // Direct handoff keeps physics blocked; neither an unpause nor a teleport is involved.
@@ -51,6 +59,7 @@ export const useDialogueStore = create<DialogueState>((set, get) => {
       game.setPanel("dialogue");
       interaction.publish(null, interaction.location, null);
       apply(result);
+      questStore.getState().recordEvent({ type: "npc-talked", targetId: id });
     },
     respond: (input) => {
       const { session, phase } = get();

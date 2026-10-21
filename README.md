@@ -1,10 +1,11 @@
 # The Village of Riyan
 
 A medieval personal portfolio built with Next.js App Router, React, TypeScript,
-Tailwind CSS, and React Three Fiber. Phases 01–05 provide the foundation,
-procedural village, playable civilian, interactive buildings, and five villagers
-with branching dialogue. Approved portfolio entries and a full quest system
-have not been added yet.
+Tailwind CSS, and React Three Fiber. Phases 01–07 provide the foundation,
+procedural village, playable civilian, interactive buildings, five villagers,
+real portfolio content imported from https://heyriyan.vercel.app/, and optional
+exploration discoveries with a saved journal and village map. Missing personal
+details remain explicit TODOs.
 
 ## Installation
 
@@ -28,8 +29,11 @@ npm run test:world # World layout, road, anchor, and gate configuration checks
 npm run test:player # Motion, real Rapier collision, camera, and input lifecycle tests
 npm run test:interactions # Range, real wall occlusion, destinations, pause, and cooldown
 npm run test:dialogue # Dialogue graph/actions, NPC placement/occlusion, handoffs, camera
-npm test           # All four suites
+npm run test:portfolio # Real content, source/asset integrity, safe links, shared HTML rendering
+npm run test:exploration # Quest events, persistence, lifecycle, journal, and world map
+npm test           # All six suites
 npm run build      # Production build
+npm run test:portfolio:build # After build: script-free portfolio/case-study HTML checks
 npm start          # Serve the production build
 ```
 
@@ -42,9 +46,13 @@ npm start          # Serve the production build
   a nearby villager or interact at an entrance, Escape to close a panel or pause.
   Drag to rotate the third-person camera. Scroll or use +/− for distance.
   Small screens offer directional buttons, a Run toggle, and tappable prompts.
+  Journal and Map above the scene offer optional discoveries and walking guidance.
 - `/portfolio`: server-rendered HTML portfolio with section navigation;
-  independent of WebGL and readable with JavaScript disabled. Explicit empty
-  states remain until verified portfolio information is supplied.
+  independent of WebGL and readable with JavaScript disabled. Includes profile,
+  five projects, skills, three work records, education, five certifications, and
+  public contact channels, using the exact data shared by the village.
+- `/portfolio/projects/[projectId]`: five static case-study routes with source
+  screenshots, challenge/contribution/outcome records, and explicit TODO gaps.
 
 ## Architecture
 
@@ -59,24 +67,32 @@ src/components/world/physics/ Static Rapier colliders
 src/components/world/interactions/ Physics query bridge, prompt, location, panels
 src/components/world/npcs/ Shared procedural resources, costumes, animated villagers
 src/components/world/dialogue/ Parchment conversation UI, text reveal, vector portraits
-src/components/portfolio/ Shared HTML contact/social/CV resources
+src/components/world/exploration/ Optional quest journal, overview map, toolbar/dialog
+src/components/portfolio/ Shared journal, project board/case studies, skills, archives,
+                          contact resources, safe optional images
 src/data/                Typed portfolio content and centralized world layout
+src/data/portfolio/      Profile, contact, projects, skills, experience, education,
+                         certificates, source references, and missing-content index
 src/hooks/               Browser capability hooks
-src/stores/              Zustand state and persisted preferences
+src/stores/              Zustand state, saved preferences, and saved exploration
 src/systems/world/       Deterministic static geometry builders, placement,
                          shared terrain mesh data, roads, and collision data
 src/systems/player/      Mutable simulation, input lifecycle, character controller,
                          camera obstruction queries
 src/systems/interactions/ Nearest-entrance selection, visibility query, interaction manager
 src/systems/dialogue/    Pure branching engine and graph validation
+src/systems/exploration/ Quest event matching, progress validation, map transforms,
+                         journal/map panel lifecycle
+src/systems/portfolio/   Verified outbound-link eligibility
 src/systems/             Graphics presets and persistence adapter
 src/types/               Shared content and state contracts
 public/assets/           Optional assets and license/replacement documentation
-tests/                   World configuration and player/physics tests
+tests/                   World, player/physics, interactions, dialogue, portfolio,
+                         exploration, and post-build HTML checks
 ```
 
 The canvas is loaded with `ssr: false` from a client component and only on
-`/world`. Active gameplay renders continuously. Manual, Settings, and building
+`/world`. Active gameplay renders continuously. Manual, Settings, building, journal, and map
 pause use on-demand rendering. Conversations keep visual frames running for NPC
 gestures and camera framing, while physics/player movement remain paused.
 Pixel ratio and shadows follow quality.
@@ -199,7 +215,7 @@ clicks use the same request path and revalidate geometry on the next frame.
 
 Cottage maps to About Me; Guild to Projects; Forge to Skills; Library to
 Experience, Education, and Certifications; Gate to Contact. The HTML panels use
-the same typed local content as `/portfolio`, including explicit empty states.
+the same typed local content as `/portfolio`, including explicit TODO states.
 No biography, achievements, projects, credentials, or contact links are invented.
 
 Opening sets the shared blocking panel and pauses physics/camera. The canvas,
@@ -260,16 +276,115 @@ action transfers directly to the existing building dialog without unpausing.
 
 Directions mark the destination label and entrance ring, and show its name in a
 small guidance card. Alden supplies readable walking instructions. There is no
-teleport. `src/stores/guidance-store.ts` holds this highlight and the idempotent
-“Meet Elder Alden” discovery action. This is a session-only objective hook, not
-a quest log/reward system. Dialogue/guidance state resets on world exit/context loss.
+teleport. `src/stores/guidance-store.ts` holds the manual walking destination.
+Discovery progress now lives in the separate persisted
+quest store described below. Dialogue and manual directions reset on world exit/
+context loss; completed discoveries and the tracked objective remain saved.
 
-Rowan opens the contact panel. `portfolio.contact` supports approved email,
-social profiles, and a real CV file under `public/assets/`; shared HTML rendering
-also exposes these independently on `/portfolio`. All are currently unavailable,
-so no fake social link or download button is shown. A CV file must actually be
-added and approved before setting its path. NPC writing explains missing content.
-The guild board remains decorative; Elara says to use the Projects panel.
+Rowan opens the shared contact panel with the email and GitHub/LinkedIn/Instagram
+links published on the original portfolio. No resume was supplied, so no download
+button is shown. A real approved CV file or URL must be provided before linking it.
+NPC writing now reflects the imported records. The guild's entrance/NPC opens a
+functional parchment quest board; choosing a notice opens a case study inside
+the existing panel, and Back returns to the board without unmounting the scene.
+
+## Real portfolio content
+
+`src/data/portfolio.ts` is the shared facade over strongly typed local modules
+in `src/data/portfolio/`. Source references and the 21 October 2026 review date
+travel with the records. Update the modules once to change both portfolio modes.
+There is no source-site/API dependency at runtime or build time.
+
+The imported identity is Riyandi Heri Pitono (Riyan), an Information Technology
+student at Telkom University and web developer. The original five project titles
+are preserved: Mount Adventure Roblox, Car Evaluation Classifier, Cybersecurity
+Learning Platform, IoT Monitoring Dashboard, and Chibii Snack Website. Published
+work roles, education, and original-language certificate titles/issuers are kept.
+Skills are grouped technically, without percentages; exploring items are marked.
+
+`PortfolioSectionContent` and the shared renderers produce the Cottage journal,
+Forge workshop, Library timelines/records, and Gate contact resources, as well
+as conventional HTML sections. The Guild adds local selection state around the
+same project board/case-study renderer. Its records are also direct, static HTML
+routes, with titles/descriptions, semantic headings, and crawlable project/contact
+links. Unknown project IDs return 404. No deployment hostname or canonical URL
+was invented for this new application.
+
+Four real source project captures and one portrait are stored under
+`public/assets/portfolio/`. Next Image serves responsive versions; failed optional
+images expose a text fallback and never hide the written record. The IoT source
+uses stock imagery, so its gallery instead asks for a genuine screenshot.
+
+The original project actions are `#` placeholders, so demo/repository actions
+are omitted. No credential links or CV were supplied. The classifier's reported
+accuracy is qualified as source-reported with missing evaluation context.
+Roblox naming and Chibii implementation/stack conflicts are disclosed instead
+of silently guessing. LinkedIn is verified as a published owner link but blocks
+automated availability checks. Public email uses a real mailto link; the source
+site's third-party form submission service is not included.
+
+See `docs/portfolio-source-audit.md` for sources/media permission/checks and
+`docs/portfolio-missing-content.md` for the complete manual completion list.
+`missing-content.ts` exposes the structured TODO index. Preserve nulls and TODOs
+until actual information is supplied. Resume, demo, repository, and credential
+actions require safe, sourced destinations; missing values never become buttons.
+
+## Optional exploration journal and map
+
+Phase 07 adds Journal and Map buttons above the scene. These native keyboard/
+touch controls open a parchment dialog that pauses the resident and physics.
+Discoveries and Village map switch pages inside the same dialog. Escape or Close
+returns focus to the scene and preserves any explicit manual pause.
+
+`src/data/quests.ts` is the typed catalog. `src/systems/exploration/progress.ts`
+matches successful game events to objectives and derives Not started, Active,
+and Completed records. The initial suggestion is Elder Alden; visitors can stop
+tracking, select another objective, or complete any objective without selecting it.
+Tracking and opening the journal/map never give progress. There are no rewards,
+levels, content gates, or required quest order.
+
+| Objective | Actual completion trigger |
+| --- | --- |
+| The First Encounter | Successfully start a conversation with Elder Alden. |
+| The Guild’s Records | Open the Guild project panel through its entrance or Elara. |
+| Tools of the Trade | Successfully start a conversation with Borin. |
+| Pages of the Past | Successfully start a conversation with Lyra. |
+| A Message Beyond | Successfully start a conversation with Rowan. |
+
+The existing interaction manager still checks proximity, focus, line of sight,
+blocking dialogs, and cooldown before these successful actions emit events.
+Completion is idempotent. Alden’s dialogue objective hook now uses the same
+catalog/store instead of maintaining a second completion array. After all five,
+the toolbar and journal quietly display “Every story in the village has been
+discovered.” Free exploration continues. Every portfolio panel and HTML route
+remains accessible before and after every discovery.
+
+`src/stores/quest-store.ts` persists only completed IDs and the selected objective
+under `riyan-village-exploration-v1`, schema version 1. Counts, percentages, and
+statuses are derived from those saved IDs to avoid contradictory saved progress.
+Hydration occurs on the client before starting interactions. Unknown/duplicate
+IDs and invalid selections are filtered; incompatible versions start a fresh
+optional journal. Malformed JSON, unavailable storage, and exhausted quota leave
+the in-memory journal usable. Runtime coordinates, pauses, dialogs, NPC sessions,
+and manual directions are never persisted with exploration progress.
+
+The map is an SVG/HTML interface outside the Three renderer. Its finite boundary,
+square, well, roads, rotated building footprints, entrance targets, and NPC
+objective markers use existing world/NPC configuration. North is world -Z;
+east is +X. Numbers match the scene/directory. Blue marks the resident, a gold
+diamond marks the tracked objective, and gold outlines mark a walking destination.
+The resident’s position/heading are captured when the paused map opens, without
+per-frame React updates. Text labels and an HTML destination list accompany the
+map; Mark path highlights the existing landmark and returns to walking. It does
+not teleport or complete a quest. Saved tracking restores the subtle destination
+card and building marker on the next visit. Manual directions take precedence;
+Clear directions stops tracking and clears the manual mark.
+
+The journal/map components live in `src/components/world/exploration/`, with
+separate quest contracts, state, map math, panel lifecycle, and responsive styles.
+No additional assets, packages, APIs, or environment variables were introduced.
+Run `npm run test:exploration` for the focused checks and see
+`docs/phase-07-verification.md` for scope, verification, and manual checks.
 
 ## Dependency compatibility
 
@@ -308,7 +423,7 @@ See `public/assets/README.md` for the future model replacement and license polic
 
 ## Planned phases
 
-Phases 01–05 are implemented. Later phases remain subject to explicit scope:
+Phases 01–07 are implemented. Later phases remain subject to explicit scope:
 
 1. Foundation: project setup, menu, settings, routing, HTML fallback, scene test.
 2. Medieval world: finite terrain, five landmarks, square, roads, scenery, and
@@ -319,15 +434,20 @@ Phases 01–05 are implemented. Later phases remain subject to explicit scope:
    shared portfolio panels, and safe return to exploration.
 5. NPCs/dialogue: five distinct villagers, branching authored conversations,
    portfolio handoffs, walking guidance, and objective action hooks.
-6. Approved portfolio content, additional objects, and optional discovery quests
-   only when requested; accessibility/performance polish and deployment QA.
+6. Real portfolio integration: shared typed content, actual projects and archives,
+   Guild case studies, HTML project routes, public contact, and honest TODOs.
+7. Exploration quests and journal: optional discoveries, event-driven progress,
+   persisted tracking, a world-derived overview map, and walking guidance.
+8. Additional objects, accessibility/performance polish, and deployment QA only
+   when requested.
 
 ## Vercel
 
 Use the standard Next.js preset and project root. Build with `npm run build`;
 let Vercel detect the output directory. No environment variables or backend
 services are required. Use a supported Node version meeting the engine floor.
-Settings are browser-local, not synchronized between devices. Do not enable
+Settings and exploration progress are browser-local, not synchronized between
+devices. No gameplay feature requires storage access. Do not enable
 static export without separately checking route and asset requirements.
 
 Next.js appended its standard managed guidance block to `AGENTS.md` on the
@@ -358,11 +478,26 @@ first dev run; the existing project instructions are preserved above it.
    Open action and check the matching building panel. End conversations using
    Escape/Close, then press a fresh movement key. Verify no E-repeat reopening.
    Test Tab/Shift+Tab, Enter/Space, Show all text, the reveal preference, and
-   reduced motion. Rowan must show unavailable social/CV states, not fake links.
+   reduced motion. Rowan should show the published contact/social channels and a
+   clear resume TODO, with no fake CV download.
 7. Visit `/portfolio` directly with WebGL unavailable and with JavaScript disabled;
-   confirm section links and all content remain accessible.
-8. Emulate reduced motion; check the loading indicator no longer animates.
-9. Check browser console for unexpected errors and run npm test, lint, typecheck,
-   and build sequentially. See docs/phase-05-verification.md for tested scope
-   and limitations. Browser origin approval previously declined localhost;
-   the Phase 05 visual/keyboard browser pass was not attempted again.
+   confirm all seven section links and content remain accessible. Open each
+   project case study directly. In the Guild, select each notice, inspect its
+   gallery/records/TODOs, and return to the board and exploration. Check the real
+   mailto action, public social links, and omission of unverified project actions.
+8. Open Journal and Map with keyboard and touch at desktop and 375px width.
+   Track/stop tracking objectives, inspect the player/target/landmark markers,
+   and mark a walking destination. Check that dialogs pause movement, map
+   selection never teleports/completes a quest, and Close/Escape restores focus.
+   With Debug visible, compare map position to world X/Z at each landmark.
+   Talk to Alden, Borin, Lyra, and Rowan; open the Guild board through its entrance
+   or Elara. Complete in any order, including untracked objectives. Check 5/5
+   and the completion message; continue walking and opening portfolio panels.
+   Refresh mid-progress and after completion; verify saved tracking/progress.
+   With site storage disabled, repeat an interaction and check the in-memory
+   journal still updates. Content must remain available at zero discoveries.
+9. Emulate reduced motion; check the loading indicator no longer animates.
+10. Check browser console for unexpected errors and run npm test, lint, typecheck,
+   and build sequentially, then `npm run test:portfolio:build`. See
+   docs/phase-07-verification.md for tested scope and limitations. Browser origin
+   approval previously declined localhost; no workaround browser pass is claimed.

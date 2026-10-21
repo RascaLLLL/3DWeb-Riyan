@@ -1,7 +1,8 @@
 import type { DialogueTreeId, NpcId } from "./npc";
 import type { BuildingId } from "./world";
+import type { QuestId } from "./quest";
 
-export type DiscoveryObjectiveId = "meet-guide";
+export type DiscoveryObjectiveId = QuestId;
 export type DialogueExpression = "warm" | "thoughtful" | "cheerful" | "calm";
 export type DialogueAction =
   | { type: "open-panel"; destination: BuildingId }

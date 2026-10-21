@@ -6,7 +6,7 @@ import { buildingInteractables, buildingPresentations } from "@/data/building-in
 import { localToWorld } from "@/data/world";
 import { useInteractionStore } from "@/stores/interaction-store";
 import type { BuildingId } from "@/types/world";
-import { useGuidanceStore } from "@/stores/guidance-store";
+import { useWalkingDestination } from "@/hooks/use-walking-destination";
 
 function paintedSign(id: BuildingId) {
   const canvas = document.createElement("canvas");
@@ -31,7 +31,7 @@ function paintedSign(id: BuildingId) {
 /** Original painted canvas textures, shared geometry, no downloaded fonts or models. */
 export function BuildingSigns() {
   const nearby = useInteractionStore((state) => state.nearbyId);
-  const destination = useGuidanceStore((state) => state.destination);
+  const destination = useWalkingDestination();
   const resources = useMemo(() => ({
     box: new BoxGeometry(1, 1, 1), plane: new PlaneGeometry(2.4, .8), ring: new RingGeometry(.43, .49, 24),
     wood: new MeshStandardMaterial({ color: "#63472f", roughness: 1 }),

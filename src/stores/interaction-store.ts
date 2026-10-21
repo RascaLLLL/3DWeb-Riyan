@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { interactionConfig } from "@/data/building-interactions";
 import { useGameStore } from "./game-store";
+import { questStore } from "./quest-store";
 import type { BuildingId } from "@/types/world";
 import type { BuildingPanelPhase } from "@/types/interaction";
 import type { NpcId } from "@/types/npc";
@@ -41,12 +42,14 @@ export const useInteractionStore = create<InteractionState>((set, get) => ({
     // Pause before mounting the native dialog; the same scene/physics bodies stay alive.
     game.setPanel("building");
     set({ buildingId: id, phase: "open", nearbyId: null, nearbyNpcId: null });
+    questStore.getState().recordEvent({ type: "building-opened", targetId: id });
   },
   openFromDialogue: (id) => {
     const game = useGameStore.getState();
     if (!game.gameStarted || game.activePanel !== "dialogue" || get().phase !== "closed") return false;
     game.setPanel("building");
     set({ buildingId: id, phase: "open", nearbyId: null, nearbyNpcId: null });
+    questStore.getState().recordEvent({ type: "building-opened", targetId: id });
     return true;
   },
   defer: (now) => set({ nearbyId: null, nearbyNpcId: null, cooldownUntil: now + interactionConfig.reopenDelayMs }),

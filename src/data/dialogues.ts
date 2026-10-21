@@ -1,5 +1,6 @@
 import { directions } from "./directions";
 import { portfolio } from "./portfolio";
+import { projectCategories } from "./portfolio/projects";
 import type { DialogueCatalog, DialogueNode, DialogueTree } from "@/types/dialogue";
 import type { DialogueTreeId, NpcId } from "@/types/npc";
 import type { BuildingId } from "@/types/world";
@@ -12,6 +13,7 @@ const leave = { id: "leave", label: "Thank you. I’ll keep exploring.", action:
 const open = (destination: BuildingId, label: string) => ({ id: "open", label, action: { type: "open-panel" as const, destination } });
 const back = { id: "back", label: "I have another question.", next: "welcome" };
 const way = (destination: BuildingId, label: string) => ({ id: destination, label, next: `way-${destination}`, action: { type: "highlight-destination" as const, destination } });
+const publishedCategories = Array.from(new Set(portfolio.projects.map((project) => projectCategories[project.category]))).join(", ");
 
 export const dialogues: DialogueCatalog = {
   "village-guide": tree("village-guide", "alden", {
@@ -29,25 +31,25 @@ export const dialogues: DialogueCatalog = {
       way("library", "Grand Library — Archives"), way("gate", "Kingdom Gate — Contact"), back, leave,
     ] },
     ...Object.fromEntries((Object.keys(directions) as BuildingId[]).map((id) => [`way-${id}`, { text: directions[id], expression: "thoughtful", next: "destinations" } satisfies NodeContent])),
-    objectives: { text: "For a short stroll, meet Elara at the guild, Borin at the forge, and Lyra at the library. Finish with Rowan at the gate. Meeting your guide is already noted; the rest is simply an invitation.", choices: [back, leave] },
+    objectives: { text: "Your journal notes five optional discoveries. Browse the guild’s project board, meet Borin and Lyra, then visit Rowan. Open Journal or Map above the village to choose a destination. You can visit in any order; every portfolio record is always available.", choices: [back, leave] },
   }),
   "guild-keeper": tree("guild-keeper", "elara", {
-    welcome: { text: "Elara, guild keeper. I help visitors find their way through the project records. Riyan’s approved project entries aren’t published yet, but I can show you where they belong.", expression: "cheerful",
+    welcome: { text: `Elara, guild keeper. There are ${portfolio.projects.length} real project records on the board. Choose a notice to see the approach, contribution, and published results—with missing details clearly marked.`, expression: "cheerful",
       choices: [open("guild", "Open featured projects."), { id: "categories", label: "How are the projects arranged?", next: "categories" }, { id: "board", label: "Where is the quest board?", next: "board", action: { type: "highlight-destination", destination: "guild" } }, leave] },
-    categories: { text: "Each project record should explain the problem, approach, technologies, and verified result. Categories will follow Riyan’s real entries; no project categories or achievements have been supplied yet.", choices: [open("guild", "Show me the project showcase."), back, leave] },
-    board: { text: "Look for the hanging board beside the guild entrance. In this version, the Projects panel holds the records; the wooden board itself has no separate interaction yet.", choices: [open("guild", "Open the project showcase."), back, leave] },
+    categories: { text: `The records cover ${publishedCategories}. Each opens a case study. A project’s demo or repository appears only when its destination is verified.`, choices: [open("guild", "Show me the project showcase."), back, leave] },
+    board: { text: "The project quest board opens through the guild entrance or from me. Choose a notice to read its case study, then return to the board without leaving your place in the village.", choices: [open("guild", "Open the project showcase."), back, leave] },
   }),
   "forge-master": tree("forge-master", "borin", {
     welcome: { text: "Borin. I look after the tools of the trade. The skills records belong here—rather easier to carry than an anvil.", expression: "warm",
       choices: [open("forge", "Open skills and technologies."), { id: "categories", label: "What do the skill categories mean?", next: "categories" }, leave] },
-    categories: { text: "Languages describe how code is written; frameworks shape an application; tools help build and test it. Those are useful groups to browse, not claims about Riyan’s skills. The approved skill list is still awaiting content.", choices: [open("forge", "Show me the skills interface."), back, leave] },
+    categories: { text: "Languages are the core materials; frameworks help shape the interface; tools are workshop equipment. The records include Python, React, Next.js, and more. Skills being explored are labeled separately—there are no proficiency percentages.", choices: [open("forge", "Show me the skills interface."), back, leave] },
   }),
   archivist: tree("archivist", "lyra", {
     welcome: { text: "I’m Lyra, the archivist. These shelves keep work history, education, and certifications together. Which part would you like to understand?", expression: "calm",
       choices: [{ id: "work", label: "Tell me about work experience.", next: "work" }, { id: "education", label: "What belongs in the education records?", next: "education" }, { id: "certifications", label: "Are certifications available?", next: "certifications" }, open("library", "Open the archives."), leave] },
-    work: { text: "The experience records are for verified roles, responsibilities, and dates. No professional history has been provided yet; an empty shelf is better than an invented record.", choices: [open("library", "Open the experience archive."), back, leave] },
-    education: { text: "Education records will identify the institution, course, and dates once Riyan approves them. There are no education details published yet.", choices: [open("library", "Open the education archive."), back, leave] },
-    certifications: { text: "No verified certifications have been supplied. When they are, the archives can list the issuer, credential, and any approved verification link.", choices: [open("library", "Open the certification archive."), back, leave] },
+    work: { text: "The archives list freelance web development, Roblox game development, and maintenance work at Astra Visteon Indonesia. You can read the published dates and responsibilities. Exact months and documented outcomes still need completion.", choices: [open("library", "Open the experience archive."), back, leave] },
+    education: { text: `Riyan’s published education is ${portfolio.education[0].studyProgram} at ${portfolio.education[0].institution}. The record includes academic focus areas; it does not invent a graduation date, GPA, or honors.`, choices: [open("library", "Open the education archive."), back, leave] },
+    certifications: { text: `There are ${portfolio.certifications.length} published certification records, with their original titles and issuers. Issue dates and credential verification links are still TODO, so no verification buttons are shown yet.`, choices: [open("library", "Open the certification archive."), back, leave] },
   }),
   gatekeeper: tree("gatekeeper", "rowan", {
     welcome: { text: "Welcome. I’m Rowan, keeper of the gate. This is the place for contact details, approved social profiles, and a CV when Riyan makes one available.", expression: "warm",

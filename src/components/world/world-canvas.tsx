@@ -19,6 +19,8 @@ import { useDialogueStore } from "@/stores/dialogue-store";
 import { useGuidanceStore } from "@/stores/guidance-store";
 import { DialogueInterface } from "./dialogue/dialogue-interface";
 import { DestinationGuidance } from "./interactions/destination-guidance";
+import { ExplorationInterface, ExplorationToolbar } from "./exploration/exploration-interface";
+import { closeExplorationPanel } from "@/systems/exploration/panels";
 
 function ContextLossHandler({ onLost }: { onLost: () => void }) {
   const gl = useThree((state) => state.gl);
@@ -52,6 +54,7 @@ export default function WorldCanvas() {
       useDialogueStore.getState().reset();
       useInteractionStore.getState().reset();
       useGuidanceStore.getState().reset();
+      closeExplorationPanel(performance.now());
     };
     return reset;
   }, []);
@@ -60,11 +63,12 @@ export default function WorldCanvas() {
       useDialogueStore.getState().reset();
       useInteractionStore.getState().reset();
       useGuidanceStore.getState().reset();
+      closeExplorationPanel(performance.now());
     }
   }, [contextLost]);
   const preset = graphicsPresets[quality];
   if (contextLost) return <WorldFallback />;
-  return <div className="canvas-container" onContextMenu={(e) => e.preventDefault()}>
+  return <div className="world-exploration"><ExplorationToolbar /><div className="canvas-container" onContextMenu={(e) => e.preventDefault()}>
     <Canvas camera={{ position: [worldConfig.spawn.position[0], 4.2, worldConfig.spawn.position[2] + 7], fov: 50, near: .12, far: worldConfig.camera.far }} dpr={preset.dpr}
       shadows={preset.shadows ? { type: PCFShadowMap } : false} frameloop={paused && !conversation ? "demand" : "always"}
       onCreated={({ gl }) => { surface.current = gl.domElement; }}
@@ -80,5 +84,6 @@ export default function WorldCanvas() {
     <DestinationGuidance />
     <BuildingPanelManager restoreFocus={restoreFocus} />
     <DialogueInterface restoreFocus={restoreFocus} />
-  </div>;
+    <ExplorationInterface runtime={runtime} restoreFocus={restoreFocus} />
+  </div></div>;
 }

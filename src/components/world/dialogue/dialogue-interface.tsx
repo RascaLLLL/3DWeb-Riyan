@@ -7,6 +7,7 @@ import { buildingPresentations, interactionConfig } from "@/data/building-intera
 import { discoveryObjectives } from "@/data/discoveries";
 import { useDialogueStore } from "@/stores/dialogue-store";
 import { useGuidanceStore } from "@/stores/guidance-store";
+import { useQuestStore } from "@/stores/quest-store";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { Modal } from "@/components/ui/modal";
 import { NpcPortrait } from "./npc-portrait";
@@ -19,7 +20,7 @@ export function DialogueInterface({ restoreFocus }: { restoreFocus: () => void }
   const close = useDialogueStore((state) => state.beginClose);
   const respond = useDialogueStore((state) => state.respond);
   const destination = useGuidanceStore((state) => state.destination);
-  const discoveries = useGuidanceStore((state) => state.completedObjectives);
+  const discoveries = useQuestStore((state) => state.completedObjectives);
   const quiet = useReducedMotion();
   const [animateText, setAnimateText] = useState(true);
   useEffect(() => {
