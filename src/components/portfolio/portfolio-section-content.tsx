@@ -10,9 +10,9 @@ export function PortfolioSectionContent({ section, village = false }: { section:
     case "about": return <ProfileJournal />;
     case "projects": return <ProjectBoard />;
     case "skills": return <SkillWorkshop village={village} />;
-    case "experience": return <ExperienceTimeline />;
-    case "education": return <EducationArchive />;
-    case "certifications": return <CertificationArchive />;
+    case "experience": return <ExperienceTimeline headingLevel={village ? 4 : 3} />;
+    case "education": return <EducationArchive headingLevel={village ? 4 : 3} />;
+    case "certifications": return <CertificationArchive headingLevel={village ? 4 : 3} />;
     case "contact": return <ContactResources />;
   }
 }

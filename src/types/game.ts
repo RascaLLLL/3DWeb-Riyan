@@ -9,5 +9,6 @@ export interface SavedSettings {
   graphicsQuality: GraphicsQuality;
   musicVolume: number;
   soundEffectsVolume: number;
+  cameraSensitivity: number;
   playerPreferences: PlayerPreferences;
 }

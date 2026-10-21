@@ -1,8 +1,8 @@
-// Original vector illustration: no downloaded art, fonts, or external assets.
+// Original concept illustration; the accurate navigation map is inside the village.
 export function VillageMap() {
   const trees = [[70,160],[100,110],[135,145],[180,85],[230,95],[470,120],[510,150],[550,210],[520,300],[480,390],[100,350],[65,290],[160,410],[390,430],[310,70],[425,80]];
   return <svg className="village-map" viewBox="0 0 620 520" role="img" aria-labelledby="map-title map-desc">
-    <title id="map-title">A map of the village to come</title><desc id="map-desc">An illustrated woodland village with cottages, a winding path, and a hilltop tower. A concept illustration for future exploration.</desc>
+    <title id="map-title">An illustrated keepsake of the village</title><desc id="map-desc">A decorative woodland village with cottages, a winding path, and a hilltop tower. The live navigation map is available inside the village.</desc>
     <defs>
       <pattern id="map-grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" stroke="#786c47" strokeWidth=".5" opacity=".12" /></pattern>
       <g id="pine"><path d="M0 13V36" stroke="#6b6548" strokeWidth="3"/><path d="M0-20L-16 12H-10L-22 26H22L10 12H16Z" fill="#65715a" stroke="#3c4d3e" strokeWidth="1.4"/><path d="M0-16V23L16 23Z" fill="#3c5142" opacity=".45"/></g>

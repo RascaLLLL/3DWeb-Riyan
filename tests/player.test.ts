@@ -243,6 +243,16 @@ test("input bindings clear on blur, ignore forms/menus, release capture, and rem
     useGameStore.getState().setPanel(null);
     send(canvas, "pointerdown", { button: 0, isPrimary: true, pointerId: 1, clientX: 10, clientY: 10 });
     assert.ok(canvas.hasPointerCapture(1));
+    const initialYaw = state.cameraYaw;
+    useGameStore.getState().setCameraSensitivity(.5);
+    send(canvas, "pointermove", { pointerId: 1, clientX: 110, clientY: 10 });
+    const firstDelta = initialYaw - state.cameraYaw;
+    assert.ok(Math.abs(firstDelta - 100 * config.camera.sensitivity * .5) < .000001);
+    useGameStore.getState().setCameraSensitivity(2);
+    const previousYaw = state.cameraYaw;
+    send(canvas, "pointermove", { pointerId: 1, clientX: 210, clientY: 10 });
+    assert.ok(Math.abs(previousYaw - state.cameraYaw - firstDelta * 4) < .000001);
+    useGameStore.getState().setCameraSensitivity(1);
     send(canvas, "pointermove", { pointerId: 1, clientX: 110, clientY: 10000 });
     assert.ok(state.cameraYaw < 0); assert.equal(state.cameraPitch, config.camera.maxPitch);
     send(windowSurface, "blur");
@@ -254,7 +264,7 @@ test("input bindings clear on blur, ignore forms/menus, release capture, and rem
     send(canvas, "pointerdown", { button: 0, isPrimary: true, pointerId: 2, clientX: 0, clientY: 0 });
     assert.equal(canvas.captured.size, 0);
   } finally {
-    cleanup(); useGameStore.getState().stopGame();
+    cleanup(); useGameStore.getState().stopGame(); useGameStore.getState().setCameraSensitivity(1);
     for (const [name, descriptor] of originals) {
       if (descriptor) Object.defineProperty(globalThis, name, descriptor); else Reflect.deleteProperty(globalThis, name);
     }

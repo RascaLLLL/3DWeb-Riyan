@@ -24,22 +24,20 @@ export function BuildingPanelManager({ restoreFocus }: { restoreFocus: () => voi
   }, [phase, reducedMotion]);
   const building = worldConfig.buildings.find((entry) => entry.id === id);
   const presentation = id ? buildingPresentations[id] : null;
-  return <Modal open={Boolean(building)} title={presentation?.title ?? "Village building"} onClose={close}
-    closeLabel="Close building panel" onAfterClose={restoreFocus} className={`building-modal portfolio-building-modal ${phase === "closing" ? "is-closing" : ""}`}>
+  return <Modal open={Boolean(building)} title={presentation?.title ?? "Village building"} subtitle={presentation?.purpose} presentation="overlay" onClose={close}
+    closeLabel="Close building panel" fallbackFocus={restoreFocus} className={`building-modal portfolio-building-modal ${phase === "closing" ? "is-closing" : ""}`}>
     {building && presentation && <>
-      <p className="eyebrow building-purpose">{presentation.purpose}</p>
-      <p className="building-welcome">{building.id === "guild" ? "Choose a notice on the quest board to read its real project record." : "A quiet place to explore the developer’s records."} Your place in the village is kept while you read.</p>
+      {building.id === "guild" && <p className="building-welcome">Choose a notice to explore a project and its story.</p>}
       <div className="building-content">{building.portfolioSections.map((sectionId) => {
         const section = portfolio.sections.find((entry) => entry.id === sectionId);
-        return section && <section key={section.id} aria-labelledby={`building-${section.id}`}>
-          <h3 id={`building-${section.id}`}>{section.id === "projects" ? "The project quest board" : section.title}</h3>
+        return section && <section key={section.id} aria-labelledby={building.portfolioSections.length > 1 ? `building-${section.id}` : undefined} aria-label={building.portfolioSections.length === 1 ? section.title : undefined}>
+          {building.portfolioSections.length > 1 && <h3 id={`building-${section.id}`}>{section.title}</h3>}
           {section.id === "projects" ? <GuildProjectBrowser /> : <PortfolioSectionContent section={section.id} village />}
         </section>;
       })}</div>
-      <p className="building-content-note">Records come from the existing portfolio. Missing or conflicting details are marked TODO.</p>
-      <div className="building-actions"><Button onClick={close} disabled={phase === "closing"}>Return to exploration</Button>
+      <div className="building-actions"><Button onClick={close} disabled={phase === "closing"}>Return to village</Button>
         <ButtonLink href={building.portfolioHref} className="button-secondary">Read in Quick Portfolio <span aria-hidden="true">↗</span></ButtonLink></div>
-      <p className="building-dismiss-hint">Escape closes this panel. You’ll return to the same spot.</p>
+      <p className="building-dismiss-hint">Escape to close · Your place in the village is kept</p>
     </>}
   </Modal>;
 }

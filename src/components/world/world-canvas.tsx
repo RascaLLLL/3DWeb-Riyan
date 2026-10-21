@@ -13,14 +13,16 @@ import { createPlayerRuntime } from "@/systems/player/motion";
 import { PlayerHUD } from "./player/player-hud";
 import { useInteractionStore } from "@/stores/interaction-store";
 import { ProximityPrompt } from "./interactions/proximity-prompt";
-import { LocationNotification } from "./interactions/location-notification";
 import { BuildingPanelManager } from "./interactions/building-panel-manager";
 import { useDialogueStore } from "@/stores/dialogue-store";
 import { useGuidanceStore } from "@/stores/guidance-store";
 import { DialogueInterface } from "./dialogue/dialogue-interface";
-import { DestinationGuidance } from "./interactions/destination-guidance";
-import { ExplorationInterface, ExplorationToolbar } from "./exploration/exploration-interface";
+import { ExplorationInterface } from "./exploration/exploration-interface";
 import { closeExplorationPanel } from "@/systems/exploration/panels";
+import { WorldHUD } from "./hud/world-hud";
+import { PauseMenu } from "./hud/pause-menu";
+import { PlayerDiagnostics } from "./player/player-diagnostics";
+import { useWorldDebugStore } from "@/stores/world-debug-store";
 
 function ContextLossHandler({ onLost }: { onLost: () => void }) {
   const gl = useThree((state) => state.gl);
@@ -42,8 +44,8 @@ export default function WorldCanvas() {
   const runtime = useRef(createPlayerRuntime());
   const body = useRef<RapierRigidBody | null>(null);
   const surface = useRef<HTMLCanvasElement | null>(null);
-  const [debug, setDebug] = useState(false);
-  const [debugColliders, setDebugColliders] = useState(false);
+  const debug = useWorldDebugStore((state) => state.visible);
+  const debugColliders = useWorldDebugStore((state) => state.colliders);
   const handleContextLoss = useCallback(() => setContextLost(true), []);
   const restoreFocus = useCallback(() => {
     const game = useGameStore.getState();
@@ -55,6 +57,7 @@ export default function WorldCanvas() {
       useInteractionStore.getState().reset();
       useGuidanceStore.getState().reset();
       closeExplorationPanel(performance.now());
+      useWorldDebugStore.getState().reset();
     };
     return reset;
   }, []);
@@ -68,20 +71,25 @@ export default function WorldCanvas() {
   }, [contextLost]);
   const preset = graphicsPresets[quality];
   if (contextLost) return <WorldFallback />;
-  return <div className="world-exploration"><ExplorationToolbar /><div className="canvas-container" onContextMenu={(e) => e.preventDefault()}>
+  return <div className="world-exploration"><div className="canvas-container" onContextMenu={(e) => e.preventDefault()}>
     <Canvas camera={{ position: [worldConfig.spawn.position[0], 4.2, worldConfig.spawn.position[2] + 7], fov: 50, near: .12, far: worldConfig.camera.far }} dpr={preset.dpr}
       shadows={preset.shadows ? { type: PCFShadowMap } : false} frameloop={paused && !conversation ? "demand" : "always"}
       onCreated={({ gl }) => { surface.current = gl.domElement; }}
-      fallback={<p>A medieval village with five landmarks around a central square. Use the village directory below or Quick Portfolio to access its information.</p>}>
+      fallback={<WorldFallback />}>
       <ContextLossHandler onLost={handleContextLoss} />
-      <VillageScene runtime={runtime} body={body} debugColliders={debugColliders && debug} />
+      <VillageScene runtime={runtime} body={body} debugColliders={process.env.NODE_ENV === "development" && debugColliders && debug} />
       <LandmarkProjection labels={labels} />
     </Canvas>
     <LandmarkLabels labels={labels} />
-    <PlayerHUD runtime={runtime} debug={debug} setDebug={setDebug} colliders={debugColliders} setColliders={setDebugColliders} />
-    <LocationNotification />
+  </div>
+  <div className="world-hud">
+    <WorldHUD />
+    <PlayerHUD runtime={runtime} restoreFocus={restoreFocus} />
     <ProximityPrompt runtime={runtime} />
-    <DestinationGuidance />
+    {process.env.NODE_ENV === "development" && <PlayerDiagnostics runtime={runtime} />}
+  </div>
+  <div className="world-panel-layer">
+    <PauseMenu restoreFocus={restoreFocus} />
     <BuildingPanelManager restoreFocus={restoreFocus} />
     <DialogueInterface restoreFocus={restoreFocus} />
     <ExplorationInterface runtime={runtime} restoreFocus={restoreFocus} />

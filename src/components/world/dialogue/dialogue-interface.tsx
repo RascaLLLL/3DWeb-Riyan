@@ -31,12 +31,11 @@ export function DialogueInterface({ restoreFocus }: { restoreFocus: () => void }
   const npc = session ? npcsById[session.npcId] : null;
   const node = session ? dialogues[session.treeId]?.nodes[session.nodeId] : null;
   return <>
-    <Modal open={Boolean(session)} title={npc?.displayName ?? "Village conversation"} onClose={close}
-      closeLabel="End conversation" onAfterClose={restoreFocus} className={`building-modal dialogue-modal ${phase === "closing" ? "is-closing" : ""}`}>
+    <Modal open={Boolean(session)} title={npc?.displayName ?? "Village conversation"} subtitle={npc?.role} leading={npc && node ? <NpcPortrait npc={npc} expression={node.expression} /> : undefined} presentation="dialogue" onClose={close}
+      closeLabel="End conversation" fallbackFocus={restoreFocus} className={`building-modal dialogue-modal ${phase === "closing" ? "is-closing" : ""}`}>
       {session && (!npc || !node) && <p role="alert">This conversation record is unavailable. End the conversation to return to the village.</p>}
       {npc && node && session && <>
-        <div className="dialogue-speaker"><NpcPortrait npc={npc} expression={node.expression} /><div><p className="eyebrow">{npc.role}</p><p>A moment in the village</p>
-          {npc.id === "alden" && discoveries.includes("meet-guide") && <small>Discovery noted: {discoveryObjectives["meet-guide"]}</small>}</div></div>
+        {npc.id === "alden" && discoveries.includes("meet-guide") && <p className="dialogue-discovery">Discovery noted: {discoveryObjectives["meet-guide"]}</p>}
         {error && <p role="alert">{error} You can always end the conversation.</p>}
         <DialogueContent key={`${session.treeId}:${session.nodeId}:${session.turn}`} node={node} animate={animateText && !quiet} closing={phase === "closing"} respond={respond} />
         {destination && <p className="dialogue-guidance" role="status">Path marked: <strong>{buildingPresentations[destination].title}</strong>. Follow the highlighted landmark when you return.</p>}

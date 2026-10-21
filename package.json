@@ -18,7 +18,8 @@
     "test:portfolio": "node --import tsx --test tests/portfolio.test.tsx",
     "test:portfolio:build": "node --test tests/portfolio-build.test.mjs",
     "test:exploration": "node --import tsx --test tests/exploration.test.tsx",
-    "test": "npm run test:world && npm run test:player && npm run test:interactions && npm run test:dialogue && npm run test:portfolio && npm run test:exploration"
+    "test:ui": "node --import tsx --test tests/ui.test.tsx",
+    "test": "npm run test:world && npm run test:player && npm run test:interactions && npm run test:dialogue && npm run test:portfolio && npm run test:exploration && npm run test:ui"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.19.2",

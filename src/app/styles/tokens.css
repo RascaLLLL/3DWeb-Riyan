@@ -1,0 +1,47 @@
+:root {
+  color-scheme: light;
+  --forest: #2d4937;
+  --forest-hover: #385b44;
+  --walnut: #473426;
+  --wood: #76553d;
+  --parchment: #d8c39a;
+  --paper: #f2e8d0;
+  --paper-raised: #fbf4e4;
+  --paper-shade: #e8d9b8;
+  --gold: #b38a49;
+  --gold-ink: #735421;
+  --gold-light: #e0c385;
+  --ink: #34382c;
+  --muted: #5e604e;
+  --line: #b4a17e;
+  --line-soft: #d4c5a4;
+  --focus: #245d78;
+  --font-display: var(--font-display-face, Georgia), "Times New Roman", serif;
+  --font-body: var(--font-body-face, Arial), Helvetica, sans-serif;
+  --font-reading: Georgia, "Times New Roman", serif;
+  --text-small: .875rem;
+  --text-label: .8125rem;
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --control-radius: 3px;
+  --duration-fast: 140ms;
+  --duration-panel: 180ms;
+  --shadow-paper: 0 3px 0 #b4a17e40, 0 12px 32px #4734260c;
+  --shadow-dialog: 0 24px 90px #1b211a66, 0 0 0 4px #b38a4926;
+  /* Shared world surfaces: quiet framing, consistent controls, readable type. */
+  --ui-border: #bcad91;
+  --ui-line: #ded3bd;
+  --ui-radius: 6px;
+  --ui-radius-panel: 10px;
+  --ui-shadow-control: 0 2px 8px #26302214;
+  --ui-shadow-floating: 0 5px 22px #26302224, inset 0 1px 0 #ffffff80;
+  --ui-shadow-panel: 0 18px 64px #1d291d38, inset 0 1px 0 #ffffffa6;
+  --ui-title: clamp(1.25rem, 1.8vw, 1.65rem);
+  --ui-heading: 1.25rem;
+  --ui-prose: 1.0625rem;
+  --ui-measure: 66ch;
+}

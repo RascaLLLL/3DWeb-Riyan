@@ -9,7 +9,13 @@ export function DialogueContent({ node, animate, closing, respond }: {
 }) {
   const [characters, setCharacters] = useState(0);
   const cursor = useRef(0);
+  const text = useRef<HTMLParagraphElement>(null);
   const typing = animate && characters < node.text.length;
+  useEffect(() => {
+    // A keyed branch replaces the focused reply; keep keyboard focus in the new turn.
+    // Initial opening remains owned by the modal's NPC heading focus.
+    if (text.current?.closest("dialog[open]")) text.current.focus({ preventScroll: true });
+  }, []);
   useEffect(() => {
     if (!animate) return;
     const timer = window.setInterval(() => {
@@ -21,13 +27,16 @@ export function DialogueContent({ node, animate, closing, respond }: {
   }, [node.text, animate]);
   const showAll = () => { cursor.current = node.text.length; setCharacters(node.text.length); };
   return <>
-    <p className="dialogue-text" aria-live="polite" aria-atomic="true">
-      <span className="sr-only">{node.text}</span><span aria-hidden="true">{animate ? node.text.slice(0, characters) : node.text}</span>
+    <p ref={text} className="dialogue-text" tabIndex={-1}>
+      <span className="sr-only">{node.text}</span>
+      <span className="dialogue-text-space" aria-hidden="true">{node.text}</span>
+      <span className="dialogue-text-reveal" aria-hidden="true">{animate ? node.text.slice(0, characters) : node.text}</span>
     </p>
-    {typing && Boolean(node.choices?.length) && <button className="dialogue-skip" onClick={showAll} disabled={closing}>Show all text</button>}
+    {animate && Boolean(node.choices?.length) && <button className="dialogue-skip" onClick={() => { if (typing) showAll(); }}
+      aria-disabled={!typing || closing} tabIndex={typing ? 0 : -1} disabled={closing}>{typing ? "Show all text" : "Text shown"}</button>}
     <div className="dialogue-choices" aria-label="Your reply">
-      {node.choices?.length ? node.choices.map((choice, index) => <Button className="dialogue-choice button-secondary" key={choice.id}
-        disabled={closing} onClick={() => respond({ type: "choice", id: choice.id })}><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>{choice.label}</Button>)
+      {node.choices?.length ? node.choices.map((choice) => <Button className={`dialogue-choice button-secondary ${choice.action?.type === "open-panel" ? "is-destination" : ""}`} key={choice.id}
+        disabled={closing} onClick={() => respond({ type: "choice", id: choice.id })}>{choice.label}</Button>)
         : <Button disabled={closing} onClick={() => typing ? showAll() : respond({ type: "continue" })}>
           {typing ? "Show all text" : node.next ? "Continue" : "Return to the village"}<span aria-hidden="true">→</span>
         </Button>}

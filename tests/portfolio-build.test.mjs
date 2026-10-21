@@ -5,6 +5,17 @@ import test from "node:test";
 const page = (path) => readFileSync(`.next/server/app/${path}.html`, "utf8").replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
 const projectIds = ["mount-adventure-roblox", "car-evaluation-classifier", "cybersecurity-learning-platform", "iot-monitoring-dashboard", "chibii-snack-website"];
 
+test("world route has a distinct immersive shell and a script-free escape to conventional mode", () => {
+  const html = page("world");
+  assert.match(html, /<main[^>]*class="world-shell"/);
+  assert.match(html, /<h1 class="sr-only">The Village of Riyan<\/h1>/);
+  assert.match(html, /viewport-fit=cover/);
+  assert.match(html, /<noscript>[\s\S]*href="\/portfolio"/);
+  assert.match(html, /<noscript>[\s\S]*href="\/"/);
+  assert.doesNotMatch(html, /class="(?:site-header|world-heading|world-viewport|village-directory|world-description)"|A resident for a day|Know your way around/);
+  assert.doesNotMatch(html, /Developer tools|Show player diagnostics|Collision wireframes/);
+});
+
 test("built Quick Portfolio exposes all sections, project routes, contact, and indexing metadata without scripts", () => {
   const html = page("portfolio");
   for (const section of ["about", "projects", "skills", "experience", "education", "certifications", "contact"]) assert.ok(html.includes(`id="${section}"`), section);

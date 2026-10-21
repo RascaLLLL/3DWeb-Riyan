@@ -16,7 +16,7 @@ export function ProximityPrompt({ runtime }: { runtime: PlayerRuntimeRef }) {
   return <div className="proximity-prompt" role="status" aria-live="polite" aria-atomic="true">
     {(presentation || npc) && !blocked && <button className="entrance-prompt" onClick={() => requestInteraction(runtime.current)}>
       <span className="entrance-key" aria-hidden="true">E</span>
-      <span><strong>{npc?.displayName ?? presentation?.title}</strong><span>{npc?.role ?? presentation?.purpose}</span><small>{npc ? "Press E to Talk" : "Press E to interact"}</small></span>
+      <span><strong>{npc?.displayName ?? presentation?.title}</strong><small>{npc ? "Press E to speak" : "Press E to enter"}</small></span>
     </button>}
   </div>;
 }

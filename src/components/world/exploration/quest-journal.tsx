@@ -3,6 +3,7 @@ import { explorationCompletionMessage } from "@/data/quests";
 import { questRecords } from "@/systems/exploration/progress";
 import { questLocationName } from "@/systems/exploration/map";
 import { Button } from "@/components/ui/button";
+import { InterfaceIcon } from "@/components/ui/interface-icon";
 import type { ExplorationProgress, QuestId, QuestRecord } from "@/types/quest";
 
 export function QuestJournal({ progress, select, showMap }: {
@@ -12,7 +13,7 @@ export function QuestJournal({ progress, select, showMap }: {
   const active = records.find((quest) => quest.status === "active");
   const remaining = records.filter((quest) => quest.status === "not-started");
   const entry = (quest: QuestRecord) => <li key={quest.id} className={`quest-entry quest-${quest.status}`}>
-    <div className="quest-entry-heading"><h4>{quest.title}</h4><span>{quest.status === "completed" ? "Completed" : quest.status === "active" ? "Active" : "Not started"}</span></div>
+    <div className="quest-entry-heading"><h4>{quest.title}</h4><span className="quest-status">{quest.status === "completed" && <InterfaceIcon name="check" />}{quest.status === "completed" ? "Completed" : quest.status === "active" ? "Active" : "Not started"}</span></div>
     <p>{quest.description}</p><p className="quest-instruction">{quest.instruction}</p>
     <p className="quest-destination">{questLocationName(quest)} · {quest.discovery}</p>
     {quest.status !== "completed" && <div className="quest-actions">

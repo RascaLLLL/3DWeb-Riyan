@@ -12,7 +12,20 @@ import { ProjectCaseStudy } from "../src/components/portfolio/project-case-study
 import { ContactResources } from "../src/components/portfolio/contact-resources";
 import { SkillWorkshop } from "../src/components/portfolio/skill-workshop";
 import { ExperienceTimeline, EducationArchive, CertificationArchive } from "../src/components/portfolio/archive-records";
+import { PortfolioSectionContent } from "../src/components/portfolio/portfolio-section-content";
 import type { VerifiedLink } from "../src/types/portfolio";
+
+test("library archive records nest below section headings without changing conventional portfolio headings", () => {
+  for (const section of ["experience", "education", "certifications"] as const) {
+    const village = renderToStaticMarkup(<PortfolioSectionContent section={section} village />);
+    const conventional = renderToStaticMarkup(<PortfolioSectionContent section={section} />);
+    assert.match(village, /<h4>/);
+    assert.doesNotMatch(village, /<h3>/);
+    assert.match(conventional, /<h3>/);
+    assert.doesNotMatch(conventional, /<h4>/);
+    assert.equal(village.replaceAll("h4>", "h3>"), conventional, "only the heading level should change; records must stay identical");
+  }
+});
 
 test("migration preserves the five published project titles and three real roles", () => {
   assert.equal(portfolio.profile.name, "Riyandi Heri Pitono");

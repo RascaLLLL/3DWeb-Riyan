@@ -5,7 +5,7 @@ import type { PlayerRuntimeRef } from "@/types/player";
 const movementKeys = new Set(["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "ShiftLeft", "ShiftRight"]);
 
 export function isEditingTarget(target: EventTarget | null) {
-  return target instanceof HTMLElement && Boolean(target.closest("input, textarea, select, button, a, [contenteditable='true'], [role='dialog']"));
+  return target instanceof HTMLElement && Boolean(target.closest("input, textarea, select, button, a, summary, dialog, [contenteditable='true'], [role='dialog']"));
 }
 
 export function bindPlayerInput(canvas: HTMLCanvasElement, runtime: PlayerRuntimeRef) {
@@ -44,9 +44,10 @@ export function bindPlayerInput(canvas: HTMLCanvasElement, runtime: PlayerRuntim
     };
     const pointerMove = (event: PointerEvent) => {
       if (!state.input.dragging || state.input.pointerId !== event.pointerId || isBlocked()) return;
-      state.cameraYaw -= (event.clientX - state.input.lastPointerX) * playerConfig.camera.sensitivity;
+      const sensitivity = playerConfig.camera.sensitivity * useGameStore.getState().cameraSensitivity;
+      state.cameraYaw -= (event.clientX - state.input.lastPointerX) * sensitivity;
       state.cameraPitch = Math.max(playerConfig.camera.minPitch, Math.min(playerConfig.camera.maxPitch,
-        state.cameraPitch + (event.clientY - state.input.lastPointerY) * playerConfig.camera.sensitivity));
+        state.cameraPitch + (event.clientY - state.input.lastPointerY) * sensitivity));
       state.input.lastPointerX = event.clientX; state.input.lastPointerY = event.clientY;
     };
     const pointerUp = (event: PointerEvent) => {

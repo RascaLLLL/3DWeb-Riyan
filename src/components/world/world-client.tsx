@@ -4,11 +4,11 @@ import { useEffect } from "react";
 import { useWebGLSupport } from "@/hooks/use-webgl-support";
 import { useGameStore } from "@/stores/game-store";
 import { hydrateQuestProgress } from "@/stores/quest-store";
-import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { WorldLoading } from "./world-loading";
 import { WorldFallback } from "./world-fallback";
 import { WorldErrorBoundary } from "./world-error-boundary";
 
-const WorldCanvas = dynamic(() => import("./world-canvas"), { ssr: false, loading: () => <LoadingIndicator label="Opening the village…" /> });
+const WorldCanvas = dynamic(() => import("./world-canvas"), { ssr: false, loading: () => <WorldLoading /> });
 export function WorldClient() {
   const supported = useWebGLSupport();
   const startGame = useGameStore((s) => s.startGame);
@@ -20,5 +20,5 @@ export function WorldClient() {
     void hydrateQuestProgress().then(() => { if (!cancelled) startGame(); });
     return () => { cancelled = true; stopGame(); };
   }, [startGame, stopGame]);
-  return <WorldErrorBoundary>{supported === null ? <LoadingIndicator label="Preparing the 3D scene…" /> : supported ? <WorldCanvas /> : <WorldFallback />}</WorldErrorBoundary>;
+  return <WorldErrorBoundary>{supported === null ? <WorldLoading label="Preparing the 3D scene…" /> : supported ? <WorldCanvas /> : <WorldFallback />}</WorldErrorBoundary>;
 }

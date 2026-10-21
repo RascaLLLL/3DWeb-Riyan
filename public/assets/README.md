@@ -3,6 +3,12 @@
 Phases 01–05 use original code-authored SVG artwork and procedural Three.js geometry.
 No external models, images, fonts, audio, or proprietary assets are required.
 
+Phase 08 adds locally bundled Cinzel and Source Sans 3 WOFF2 fonts under the SIL
+Open Font License 1.1. Sources, copyright notices, file hashes, and unchanged
+license texts are in [fonts/README.md](fonts/README.md). They need no external
+requests at build or runtime. Interface icons are original inline SVG paths;
+the menu illustration and procedural 3D assets remain unchanged.
+
 Phase 06 adds five first-party portfolio PNGs in `portfolio/`: the owner's
 published portrait and four project captures. They were migrated from the
 owner-identified portfolio at the user's direction, not under an invented asset

@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { ActivePanel, GraphicsQuality, PlayerPreferences, SavedSettings } from "@/types/game";
 import { preferenceStorage } from "@/systems/preference-storage";
+import { cameraSensitivity, validCameraSensitivity } from "@/data/interface";
 
 interface GameState extends SavedSettings {
   gameStarted: boolean;
@@ -15,12 +16,14 @@ interface GameState extends SavedSettings {
   setPanel: (panel: ActivePanel) => void;
   setPaused: (paused: boolean) => void;
   setGraphicsQuality: (quality: GraphicsQuality) => void;
+  setCameraSensitivity: (value: number) => void;
   setVolume: (channel: "musicVolume" | "soundEffectsVolume", volume: number) => void;
   setPlayerPreferences: (preferences: Partial<PlayerPreferences>) => void;
 }
 
 const defaults: SavedSettings = {
   graphicsQuality: "medium", musicVolume: 0.5, soundEffectsVolume: 0.7,
+  cameraSensitivity: cameraSensitivity.default,
   playerPreferences: { reducedMotion: false },
 };
 
@@ -34,6 +37,7 @@ function readSettings(value: unknown): SavedSettings {
       ? saved.graphicsQuality! : defaults.graphicsQuality,
     musicVolume: volume(saved.musicVolume, defaults.musicVolume),
     soundEffectsVolume: volume(saved.soundEffectsVolume, defaults.soundEffectsVolume),
+    cameraSensitivity: validCameraSensitivity(saved.cameraSensitivity),
     playerPreferences: { reducedMotion: saved.playerPreferences?.reducedMotion === true },
   };
 }
@@ -46,13 +50,14 @@ export const useGameStore = create<GameState>()(persist((set) => ({
   setPanel: (activePanel) => set((state) => ({ activePanel, gamePaused: state.gameStarted && (state.userPaused || activePanel !== null) })),
   setPaused: (userPaused) => set((state) => ({ userPaused, gamePaused: state.gameStarted && (userPaused || state.activePanel !== null) })),
   setGraphicsQuality: (graphicsQuality) => set({ graphicsQuality }),
+  setCameraSensitivity: (value) => set({ cameraSensitivity: validCameraSensitivity(value) }),
   setVolume: (channel, value) => set({ [channel]: Math.max(0, Math.min(1, value)) }),
   setPlayerPreferences: (preferences) => set((state) => ({ playerPreferences: { ...state.playerPreferences, ...preferences } })),
 }), {
   name: "riyan-village-settings", version: 1,
   storage: createJSONStorage(() => preferenceStorage),
   skipHydration: true,
-  partialize: ({ graphicsQuality, musicVolume, soundEffectsVolume, playerPreferences }) =>
-    ({ graphicsQuality, musicVolume, soundEffectsVolume, playerPreferences }),
+  partialize: ({ graphicsQuality, musicVolume, soundEffectsVolume, cameraSensitivity, playerPreferences }) =>
+    ({ graphicsQuality, musicVolume, soundEffectsVolume, cameraSensitivity, playerPreferences }),
   merge: (saved, current) => ({ ...current, ...readSettings(saved) }),
 }));
